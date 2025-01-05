@@ -4,6 +4,29 @@ It focuses on identifying packages that match specific patterns, computing metri
 of classes to matched packages, and extracting method and class information from these packages. 
 It serves as a key component in the Vocanalyzer framework for package analysis.""
 
+
+Some Examples :
+
+```
+PackageOrganizer default packageNamed: 'Athens-Cairo'
+```
+
+```
+(PackageOrganizer default packageNamed: 'Athens-Cairo') methods groupedBy: [:m | m selector ]
+```
+
+```
+((PackageOrganizer default packageNamed: 'Athens-Cairo') methods groupedBy: [:m | m selector ]) keys size
+```
+
+```
+(PackageOrganizer default packageNamed: 'Athens-Cairo') methods size
+```
+
+```
+(PackageOrganizer default packageNamed: 'Athens-Cairo') methods first ast
+```
+
 "
 Class {
 	#name : 'VocReporter',
