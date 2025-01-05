@@ -1,3 +1,10 @@
+"
+""VocReporter is a utility class that analyzes and reports information about Smalltalk packages. 
+It focuses on identifying packages that match specific patterns, computing metrics such as the ratio 
+of classes to matched packages, and extracting method and class information from these packages. 
+It serves as a key component in the Vocanalyzer framework for package analysis.""
+
+"
 Class {
 	#name : 'VocReporter',
 	#superclass : 'Object',
@@ -17,7 +24,6 @@ VocReporter >> classPackageRatio [
 
 { #category : 'as yet unclassified' }
 VocReporter >> computedMatchedPatterns [
-	
 	
 	self packageOrganizer packageNamesDo: [ :each | (packagePatterns anySatisfy: [ :pat | pat match: each ])
 																	ifTrue: [ matchedPackages add: (self packageOrganizer packageNamed: each) ] ]
@@ -63,6 +69,7 @@ VocReporter >> numberOfClasses [
 
 { #category : 'as yet unclassified' }
 VocReporter >> packagePatterns: aCollection [ 
+
 	packagePatterns := aCollection
 ]
 
