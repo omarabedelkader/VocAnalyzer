@@ -27,7 +27,7 @@ VocReporterTest >> testNumberOfClasses [
 	voc packagePatterns: #('Voc*').
 	voc computedMatchedPatterns.
 	self 
-		assert: voc numberOfClasses equals: 5
+		assert: voc numberOfClasses equals: 4
 		
 ]
 
@@ -40,7 +40,7 @@ VocReporterTest >> testPackagePatterns [
 	voc computedMatchedPatterns.
 	self 
 		assert: (voc matchedPackages collect: [ :each | each name ]) asSet 
-		equals: #('Vocanalyzer' 'VocanalyzerDataPackage1' 'VocanalyzerDataPackage2') asSet.
+		equals: #('VocAnalyzer' 'VocAnalyzer-Tests' 'VocAnalyzerDataPackage1') asSet.
 ]
 
 { #category : 'tests' }
@@ -51,5 +51,5 @@ VocReporterTest >> testUniqueSelectors [
 	voc packagePatterns: #('VocanalyzerDataPackage*').
 	voc computedMatchedPatterns.
 	self 
-		assert: voc uniqueMethods size equals: 4
+		assert: voc uniqueMethods size equals: 3
 ]
