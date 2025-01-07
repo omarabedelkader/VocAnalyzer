@@ -40,9 +40,37 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+VocReporter >> averageMethodsPerClass [
+    "Compute and return the average number of methods per class across all matched packages."
+
+    | totalMethods totalClasses |
+    totalMethods := 0.
+    self matchedPackages do: [ :pkg | totalMethods := totalMethods + pkg methods size ].
+    totalClasses := self numberOfClasses.
+    ^ totalClasses = 0 
+        ifTrue: [ 0 ]
+        ifFalse: [ (totalMethods asFloat / totalClasses) ]
+]
+
+{ #category : 'as yet unclassified' }
 VocReporter >> classPackageRatio [
 	
 	^ (self numberOfClasses / self matchedPackages size) asFloat
+]
+
+{ #category : 'as yet unclassified' }
+VocReporter >> classToMethodRatio [
+    "Return the ratio of total classes to total methods. 
+     Higher ratio might indicate fewer methods per class on average."
+
+    | totalMethods totalClasses |
+    totalMethods := 0.
+    self matchedPackages do: [ :pkg | totalMethods := totalMethods + pkg methods size ].
+    totalClasses := self numberOfClasses.
+
+    ^ totalMethods = 0 
+        ifTrue: [ 0 ]
+        ifFalse: [ totalClasses asFloat / totalMethods asFloat ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -57,6 +85,24 @@ VocReporter >> initialize [
 
 	super initialize.
 	matchedPackages := OrderedCollection new.
+]
+
+{ #category : 'as yet unclassified' }
+VocReporter >> largestClassesByMethodCount: topN [
+    "Return the topN classes that have the largest number of methods within the matched packages."
+
+    | classSizePairs sorted |
+    classSizePairs := OrderedCollection new.
+    self matchedPackages do: [ :pkg |
+        pkg definedClasses do: [ :class |
+            classSizePairs add: {class -> class selectors size}.
+        ]
+    ].
+    "Sort descending by the method count"
+    sorted := classSizePairs asArray sort: [ :a :b |
+        (a second) > (b second)
+    ].
+    ^ sorted first: (topN min: sorted size)
 ]
 
 { #category : 'as yet unclassified' }
@@ -78,6 +124,18 @@ VocReporter >> methodNames [
 	results := Set new. 
 	matchedPackages do: [ :each | results addAll: each selectors ].
 	^ results 
+]
+
+{ #category : 'as yet unclassified' }
+VocReporter >> methodsPerPackage [
+    "Return a dictionary mapping each matched package to the size (count) of its methods."
+    
+    | dict |
+    dict := Dictionary new.
+    self matchedPackages do: [ :pkg | 
+        dict at: pkg name put: pkg methods size
+    ].
+    ^ dict
 ]
 
 { #category : 'as yet unclassified' }
