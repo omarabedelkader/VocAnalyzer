@@ -130,6 +130,26 @@ VocReporterTest >> testMatchedPackagesSetter [
 ]
 
 { #category : 'tests' }
+VocReporterTest >> testMethodNames [
+
+    "Test that `methodNames` returns a collection of selectors/symbols."
+    | names |
+    names := reporter methodNames.
+    
+    self assert: names isCollection
+        description: 'methodNames should return a collection.'.
+
+    "Optionally, verify each element is likely a selector (e.g., a Symbol)."
+    self assert: (names allSatisfy: [ :each | each isSymbol ])
+        description: 'Each element should be a Symbol (i.e., a method selector).'.
+        
+    "Optional: Check non-emptiness if you expect at least some methods:
+    self deny: names isEmpty
+        description: 'Expected to have at least one method name in the collection.'."
+
+]
+
+{ #category : 'tests' }
 VocReporterTest >> testMethodsPerPackage [
 
     "Check that we get a Dictionary mapping packageName -> methodCount."
