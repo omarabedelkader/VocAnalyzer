@@ -86,7 +86,22 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+VocReporter >> argestClassesByMethodCount: topN [
+
+    | classSizePairs sorted |
+    classSizePairs := self matchedPackages 
+        flatCollect: [ :pkg | 
+            pkg definedClasses collect: [ :class | 
+                {class -> class selectors size}.
+            ] 
+        ].
+    sorted := classSizePairs asArray sort: [ :a :b | (a second) > (b second) ].
+    ^ sorted first: (topN min: sorted size)
+]
+
+{ #category : 'as yet unclassified' }
 VocReporter >> averageInstanceVariablesPerClass [
+
     | instVarCounts |
     instVarCounts := self matchedPackages
         flatCollect: [ :pkg | pkg definedClasses collect: [ :class | class instVarNames size ] ].
@@ -97,7 +112,7 @@ VocReporter >> averageInstanceVariablesPerClass [
 
 { #category : 'as yet unclassified' }
 VocReporter >> averageMethodsPerClass [
-    "Compute and return the average number of methods per class across all matched packages."
+
     ^ self numberOfClasses = 0
         ifTrue: [ 0 ]
         ifFalse: [ self totalNumberOfMethods asFloat / self numberOfClasses ]
@@ -111,8 +126,6 @@ VocReporter >> classPackageRatio [
 
 { #category : 'as yet unclassified' }
 VocReporter >> classToMethodRatio [
-    "Return the ratio of total classes to total methods. 
-     Higher ratio might indicate fewer methods per class on average."
 
     | totalMethods totalClasses |
     totalMethods := 0.
@@ -126,6 +139,7 @@ VocReporter >> classToMethodRatio [
 
 { #category : 'as yet unclassified' }
 VocReporter >> computeMatchedPackages [
+
     self packageOrganizer packageNamesDo: [:pkgName |
         (packagePatterns anySatisfy: [:pat | pat match: pkgName])
             ifTrue: [ matchedPackages add: (self packageOrganizer packageNamed: pkgName) ] ].
@@ -141,6 +155,7 @@ VocReporter >> computedMatchedPatterns [
 
 { #category : 'as yet unclassified' }
 VocReporter >> deprecatedMethods [
+
     | isDeprecated |
     isDeprecated := [:method | method pragmas anySatisfy: [:pr | pr selector = #deprecated]].
     ^ self matchedPackages
@@ -156,19 +171,12 @@ VocReporter >> initialize [
 
 { #category : 'as yet unclassified' }
 VocReporter >> largestClassesByMethodCount: topN [
-    "Return the topN classes that have the largest number of methods within the matched packages."
 
     | classSizePairs sorted |
-    classSizePairs := OrderedCollection new.
-    self matchedPackages do: [ :pkg |
-        pkg definedClasses do: [ :class |
-            classSizePairs add: {class -> class selectors size}.
-        ]
+    classSizePairs := self matchedPackages flatCollect: [ :pkg |
+        pkg definedClasses collect: [ :class | {class -> class selectors size} ].
     ].
-    "Sort descending by the method count"
-    sorted := classSizePairs asArray sort: [ :a :b |
-        (a second) > (b second)
-    ].
+    sorted := classSizePairs asArray sort: [ :a :b | (a second) > (b second) ].
     ^ sorted first: (topN min: sorted size)
 ]
 
@@ -195,7 +203,6 @@ VocReporter >> methodNames [
 
 { #category : 'as yet unclassified' }
 VocReporter >> methodsPerPackage [
-    "Return a dictionary mapping each matched package to the size (count) of its methods."
     
     | dict |
     dict := Dictionary new.
@@ -207,6 +214,7 @@ VocReporter >> methodsPerPackage [
 
 { #category : 'as yet unclassified' }
 VocReporter >> methodsWithMostLinesOfCode: n [
+
     | methodsWithLines |
     methodsWithLines := self matchedPackages
         flatCollect: [:pkg | 
@@ -219,6 +227,7 @@ VocReporter >> methodsWithMostLinesOfCode: n [
 
 { #category : 'as yet unclassified' }
 VocReporter >> numberOfClasses [
+
     ^ self totalNumberOfClasses
 ]
 
@@ -230,7 +239,7 @@ VocReporter >> packagePatterns: aCollection [
 
 { #category : 'as yet unclassified' }
 VocReporter >> topPackagesByClassCount: n [
-    "Return the top n packages with the most classes."
+
     ^ (self matchedPackages
         sorted: [:a :b | a definedClasses size > b definedClasses size])
         first: (n min: self matchedPackages size)
@@ -238,6 +247,7 @@ VocReporter >> topPackagesByClassCount: n [
 
 { #category : 'as yet unclassified' }
 VocReporter >> totalNumberOfClasses [
+
     ^ self matchedPackages
         inject: 0
         into: [:sum :pkg | sum + pkg definedClasses size]
@@ -245,6 +255,7 @@ VocReporter >> totalNumberOfClasses [
 
 { #category : 'as yet unclassified' }
 VocReporter >> totalNumberOfMethods [
+
     ^ self matchedPackages
         inject: 0
         into: [:sum :pkg | sum + pkg methods size]
@@ -252,6 +263,7 @@ VocReporter >> totalNumberOfMethods [
 
 { #category : 'as yet unclassified' }
 VocReporter >> uniqueMethods [
+
     | methodCounts |
     methodCounts := Dictionary new.
     self matchedPackages do: [:pkg |
