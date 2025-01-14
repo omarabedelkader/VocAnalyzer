@@ -4,31 +4,30 @@ It focuses on identifying packages that match specific patterns, computing metri
 of classes to matched packages, and extracting method and class information from these packages. 
 It serves as a key component in the Vocanalyzer framework for package analysis.""
 
+To get all the results form one simple code you can run this code:
+
+
+``` smalltalk
+global := VocReporter runAllOnPatterns: {'Kernel*'. 'Collections*'}.
+```
 
 Some Examples :
 
-```
+``` smalltalk 
 PackageOrganizer default packageNamed: 'Athens-Cairo'
-```
 
-```
 (PackageOrganizer default packageNamed: 'Athens-Cairo') methods groupedBy: [:m | m selector ]
-```
 
-```
 ((PackageOrganizer default packageNamed: 'Athens-Cairo') methods groupedBy: [:m | m selector ]) keys size
-```
 
-```
 (PackageOrganizer default packageNamed: 'Athens-Cairo') methods size
-```
 
-```
 (PackageOrganizer default packageNamed: 'Athens-Cairo') methods first ast
 ```
 
+For More details you can run this code :
 
-```
+``` smalltalk
 reporter := VocReporter new.
 reporter packagePatterns: {'Kernel*'. 'Collections*'}.
 reporter computedMatchedPatterns.
@@ -84,6 +83,22 @@ Class {
 	#category : 'VocAnalyzer',
 	#package : 'VocAnalyzer'
 }
+
+{ #category : 'as yet unclassified' }
+VocReporter class >> runAllOnPatterns: patternList [
+    "Creates a VocReporter, sets the patterns, computes the matched packages,
+    collects the results in a Dictionary, and returns it."
+
+    | reporter results |
+    reporter := self new.
+    reporter packagePatterns: patternList.
+    reporter computeMatchedPackages.
+
+    "Collect everything in a Dictionary, so the caller can navigate it."
+    results := reporter gatherAnalysis.
+
+    ^ results
+]
 
 { #category : 'as yet unclassified' }
 VocReporter >> argestClassesByMethodCount: topN [
@@ -163,6 +178,24 @@ VocReporter >> deprecatedMethods [
 ]
 
 { #category : 'as yet unclassified' }
+VocReporter >> gatherAnalysis [
+    "Gather all relevant analysis in a Dictionary and return it."
+
+    ^ Dictionary new
+        at: #matchedPackages put: self matchedPackages;
+        at: #numberOfPackages put: self matchedPackages size;
+        at: #numberOfClasses put: self numberOfClasses;
+        at: #averageMethodsPerClass put: self averageMethodsPerClass;
+        at: #averageInstanceVariablesPerClass put: self averageInstanceVariablesPerClass;
+        at: #methodsPerPackage put: self methodsPerPackage;
+        at: #classPackageRatio put: self classPackageRatio;
+        at: #deprecatedMethods put: self deprecatedMethods;
+        at: #methodsWithMostLinesOfCode put: (self methodsWithMostLinesOfCode: 5);
+        at: #uniqueMethods put: self uniqueMethods;
+        yourself
+]
+
+{ #category : 'as yet unclassified' }
 VocReporter >> initialize [
 
 	super initialize.
@@ -178,6 +211,40 @@ VocReporter >> largestClassesByMethodCount: topN [
     ].
     sorted := classSizePairs asArray sort: [ :a :b | (a second) > (b second) ].
     ^ sorted first: (topN min: sorted size)
+]
+
+{ #category : 'as yet unclassified' }
+VocReporter >> logAnalysis [
+    "Prints or logs all key analysis results to Transcript (or uses traceCr, etc.)"
+
+    Transcript show: (self matchedPackages size printString), ' packages matched.'; cr.
+    Transcript show: (self numberOfClasses printString), ' classes found.'; cr.
+
+    Transcript show: 'Average methods per class: ', self averageMethodsPerClass printString; cr.
+    Transcript show: 'Average instance variables per class: ', self averageInstanceVariablesPerClass printString; cr.
+
+    Transcript show: 'Methods per package:'; cr.
+    self methodsPerPackage keysAndValuesDo: [:pkgName :methodCount |
+        Transcript show: pkgName , ': ' , methodCount printString; cr
+    ].
+
+    Transcript show: 'Class to package ratio: ', self classPackageRatio printString; cr.
+
+    Transcript show: (self deprecatedMethods size printString), ' deprecated methods found.'; cr.
+
+    Transcript show: 'Top 5 methods with most lines of code:'; cr.
+    (self methodsWithMostLinesOfCode: 5) do: [:pair | 
+        Transcript
+            show: pair first selector;
+            show: ' (';
+            show: pair first methodClass name;
+            show: '): ';
+            show: pair second printString;
+            show: ' lines';
+            cr
+    ].
+
+    Transcript show: 'Unique methods: ', self uniqueMethods size printString; cr.
 ]
 
 { #category : 'as yet unclassified' }
