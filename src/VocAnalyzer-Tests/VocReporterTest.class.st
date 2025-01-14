@@ -23,8 +23,8 @@ VocReporterTest >> setUp [
 { #category : 'tests' }
 VocReporterTest >> tearDown [
 
-    super tearDown.
     reporter := nil.
+    super tearDown.
 ]
 
 { #category : 'tests' }
